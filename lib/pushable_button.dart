@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:pushable_buttons_3d/animation_controller_state.dart';
 
@@ -10,6 +12,7 @@ class PushableButton extends StatefulWidget {
     this.elevation = 8.0,
     this.shadow,
     this.onPressed,
+    required this.opacity,
   }) : assert(height > 0);
 
   /// child widget (normally a Text or Icon)
@@ -18,6 +21,8 @@ class PushableButton extends StatefulWidget {
   /// Color of the top layer
   /// The color of the bottom layer is derived by decreasing the luminosity by 0.15
   final HSLColor hslColor;
+
+  final double opacity;
 
   /// height of the top layer
   final double height;
@@ -127,14 +132,19 @@ class PushableButtonState extends AnimationControllerState<PushableButton> {
                       left: 0,
                       right: 0,
                       bottom: 0,
-                      child: Container(
-                        height: totalHeight - top,
-                        decoration: BoxDecoration(
-                          color: bottomHslColor.toColor(),
-                          boxShadow:
-                              widget.shadow != null ? [widget.shadow!] : [],
-                          borderRadius: BorderRadius.circular(
-                            widget.height / 2,
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 0, sigmaY: 0),
+                        child: Container(
+                          height: totalHeight - top,
+                          decoration: BoxDecoration(
+                            color: bottomHslColor.toColor().withOpacity(
+                              widget.opacity,
+                            ),
+                            boxShadow:
+                                widget.shadow != null ? [widget.shadow!] : [],
+                            borderRadius: BorderRadius.circular(
+                              widget.height / 2,
+                            ),
                           ),
                         ),
                       ),
@@ -143,13 +153,18 @@ class PushableButtonState extends AnimationControllerState<PushableButton> {
                       left: 0,
                       right: 0,
                       top: top,
-                      child: Container(
-                        height: widget.height,
-                        decoration: ShapeDecoration(
-                          color: hslColor.toColor(),
-                          shape: StadiumBorder(),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 0, sigmaY: 0),
+                        child: Container(
+                          height: widget.height,
+                          decoration: ShapeDecoration(
+                            color: hslColor.toColor().withOpacity(
+                              widget.opacity,
+                            ),
+                            shape: StadiumBorder(),
+                          ),
+                          child: Center(child: widget.child),
                         ),
-                        child: Center(child: widget.child),
                       ),
                     ),
                   ],
