@@ -13,6 +13,9 @@ class PushableButton extends StatefulWidget {
     this.shadow,
     this.onPressed,
     required this.opacity,
+    this.width,
+    this.blurIntensity = 10.0,
+    this.borderRadius,
   }) : assert(height > 0);
 
   /// child widget (normally a Text or Icon)
@@ -22,6 +25,16 @@ class PushableButton extends StatefulWidget {
   /// The color of the bottom layer is derived by decreasing the luminosity by 0.15
   final HSLColor hslColor;
 
+  /// Width of the button (optional)
+  final double? width;
+
+  /// Blur intensity for the glass morphism effect
+  final double blurIntensity;
+
+  /// Border radius for the button
+  final BorderRadius? borderRadius;
+
+  /// Opacity of the button
   final double opacity;
 
   /// height of the top layer
@@ -100,6 +113,8 @@ class PushableButtonState extends AnimationControllerState<PushableButton> {
   @override
   Widget build(BuildContext context) {
     final totalHeight = widget.height + widget.elevation;
+    final borderRadius =
+        widget.borderRadius ?? BorderRadius.circular(widget.height / 2);
 
     return SizedBox(
       height: totalHeight,
@@ -132,38 +147,61 @@ class PushableButtonState extends AnimationControllerState<PushableButton> {
                       left: 0,
                       right: 0,
                       bottom: 0,
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 0, sigmaY: 0),
-                        child: Container(
-                          height: totalHeight - top,
-                          decoration: BoxDecoration(
-                            color: bottomHslColor.toColor().withOpacity(
-                              widget.opacity,
-                            ),
-                            boxShadow:
-                                widget.shadow != null ? [widget.shadow!] : [],
-                            borderRadius: BorderRadius.circular(
-                              widget.height / 2,
+                      child: ClipRRect(
+                        borderRadius: borderRadius,
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(
+                            sigmaX: widget.blurIntensity / 2,
+                            sigmaY: widget.blurIntensity / 2,
+                          ),
+                          child: Container(
+                            height: totalHeight - top,
+                            decoration: BoxDecoration(
+                              color: bottomHslColor.toColor().withValues(
+                                alpha: widget.opacity * 0.7,
+                              ),
+                              // boxShadow:
+                              //     widget.shadow != null ? [widget.shadow!] : [],
+                              borderRadius: borderRadius,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  spreadRadius: 1,
+                                  blurRadius: 10,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                       ),
                     ),
+
                     Positioned(
                       left: 0,
                       right: 0,
                       top: top,
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 0, sigmaY: 0),
-                        child: Container(
-                          height: widget.height,
-                          decoration: ShapeDecoration(
-                            color: hslColor.toColor().withOpacity(
-                              widget.opacity,
-                            ),
-                            shape: StadiumBorder(),
+                      child: ClipRRect(
+                        borderRadius: borderRadius,
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(
+                            sigmaX: widget.blurIntensity,
+                            sigmaY: widget.blurIntensity,
                           ),
-                          child: Center(child: widget.child),
+                          child: Container(
+                            height: widget.height,
+                            decoration: BoxDecoration(
+                              color: hslColor.toColor().withValues(
+                                alpha: widget.opacity,
+                              ),
+                              borderRadius: borderRadius,
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Center(child: widget.child),
+                          ),
                         ),
                       ),
                     ),
@@ -175,28 +213,5 @@ class PushableButtonState extends AnimationControllerState<PushableButton> {
         },
       ),
     );
-
-    // SizedBox(
-    //   height: 60,
-    //   width: 300,
-    //   child: Stack(
-    //     children: [
-    //       Container(
-    //         decoration: BoxDecoration(
-    //           color: Colors.red.shade900,
-    //           borderRadius: BorderRadius.circular(20),
-    //         ),
-    //       ),
-
-    //       Container(
-    //         height: 45,
-    //         decoration: BoxDecoration(
-    //           color: Colors.red,
-    //           borderRadius: BorderRadius.circular(18),
-    //         ),
-    //       ),
-    //     ],
-    //   ),
-    // );
   }
 }
